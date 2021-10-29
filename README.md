@@ -1,3 +1,8 @@
+# Challenge
+
+This challenge was created per the specifications [here](https://form.jotform.com/211856214308452).
+
+
 # API
 
 You'll be able to get and post items using this application's API.
