@@ -1,0 +1,284 @@
+{% extends "quickcheck_challenge/layout.html" %}
+
+{% block title %}Home{% endblock title %}
+
+
+{% block body %}
+
+    <div id="app"></div>
+
+    <hr>
+
+    <script type="text/babel">
+
+
+
+    class SearchBar extends React.Component {
+
+        handleFilterTextChange = (event) => {
+            this.props.handleFilterTextChange(event.target.value); // Get event handler from <App/> Component
+        }
+
+        handleTypeChange = (event) => {
+            this.props.handleTypeChange(event.target); // Get event handler from <App/> Component
+        }
+
+        render() {
+
+            const helpText = {fontSize: "12px"}
+
+            return (
+                <div>
+                    <form className="form-group">
+                        <input className="form-control" type="search" placeholder="Search by item type" value={this.props.filterText} onChange={this.handleFilterTextChange} />
+                        <div>
+                            Filter by item type
+                        </div>
+                        <div className="form-check ms-4">
+                            <input name="jobCheck" className="form-check-input" type="checkbox" value="Job" id="flexCheckDefault4" checked={this.props.creditCardAmericanCheck} onChange={this.handleTypeChange} />
+                            <label className="form-check-label" for="flexCheckDefault4">
+                                Job
+                            </label>
+                        </div>
+                        <div className="form-check ms-4">
+                            <input name="storyCheck" className="form-check-input" type="checkbox" value="Story" id="flexCheckDefault5" checked={this.props.creditCardMasterCheck} onChange={this.handleTypeChange} />
+                            <label className="form-check-label" for="flexCheckDefault5">
+                                Story
+                            </label>
+                        </div>
+                        <div className="form-check ms-4">
+                            <input name="commentCheck" className="form-check-input" type="checkbox" value="Comment" id="flexCheckDefault6" checked={this.props.creditCardMasterCheck} onChange={this.handleTypeChange} />
+                            <label className="form-check-label" for="flexCheckDefault6">
+                                Comment
+                            </label>
+                        </div>
+                        <div className="form-check ms-4">
+                            <input name="pollCheck" className="form-check-input" type="checkbox" value="Poll" id="flexCheckDefault7" checked={this.props.creditCardMasterCheck} onChange={this.handleTypeChange} />
+                            <label className="form-check-label" for="flexCheckDefault7">
+                                Poll
+                            </label>
+                        </div>
+                        <div className="form-check ms-4">
+                            <input name="polloptCheck" className="form-check-input" type="checkbox" value="Poll Option" id="flexCheckDefault8" checked={this.props.creditCardMasterCheck} onChange={this.handleTypeChange} />
+                            <label className="form-check-label" for="flexCheckDefault8">
+                                Poll Option
+                            </label>
+                        </div>
+                    </form>
+                </div>
+            );
+        }
+    }
+
+
+    class ItemRow extends React.Component {
+        render() {
+            const item = this.props.item;
+            const href=`/item/${item.id}`
+            return (
+                <div>
+                    <div className="card w-100 m-2 bg-info text-black">
+                        <a href={href}>
+                            <div className="card-body">
+                                <h5 className="card-title">{item.title}</h5>
+                                <h6 className="card-subtitle mb-2 text-muted">Item Type: {item.type}</h6>
+                                <h6 className="card-subtitle mb-2 text-muted">HN ID: {item.HN_id ? item.HN_id : "Null"}</h6>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                
+            );
+        }
+    }
+
+    class ItemTable extends React.Component {
+        render() {
+            // These props are from <App/> Component
+            const filterText = this.props.filterText;
+            const jobCheck = this.props.jobCheck;
+            const storyCheck = this.props.storyCheck;
+            const commentCheck = this.props.commentCheck;
+            const pollCheck = this.props.pollCheck
+            const polloptCheck = this.props.polloptCheck
+            const items = this.props.items; // Entire profiles API
+            
+            
+            const checks = {
+                "job": jobCheck, "story": storyCheck,
+                "comment": commentCheck, "poll": pollCheck,
+                "pollopt": polloptCheck
+            }
+            // checked will be a list of check inputs that are true
+            const checked = []
+            for (let check in checks) {
+                if (checks[check]) checked.push(check)
+            }
+
+            let rows = []; // An array of items
+
+            // If no filter is specified
+            if (checked.length === 0 && !filterText) {
+
+                items.forEach(item => {
+                    rows.push(
+                        <ItemRow item={item} key={items.indexOf(item)} />
+                    );
+                })
+
+            }
+
+            else {
+                items.forEach(item => {
+                    // If item.type is in checked list or item.type contains filterText.
+                    // Majority of the items don't have title or I would searched by title instead.
+                    if (checked.includes(item.type) || (filterText != "" && item.type.includes(filterText))) {
+                        rows.push(
+                            <ItemRow item={item} key={items.indexOf(item)} />
+                        );
+                    }
+                })
+            }
+
+            return (
+                <>
+                {rows}
+                </>
+            );
+        }
+    }
+
+
+
+    class App extends React.Component {
+
+        constructor(props) {
+            super(props);
+            this.state = {
+                filterText: '',
+                jobCheck: false,
+                storyCheck: false,
+                commentCheck: false,
+                pollCheck: false,
+                polloptCheck: false,
+                error: null,
+                loading: false,
+                items: [],
+                counter: 0, // Start with first item
+                quantity: 20, // Load 20 posts at a time
+                page: 0,
+            };
+        }
+        
+        render() {
+
+            if (this.state.error) return <div>Error: {this.state.error.message}</div>;
+            
+            return (
+                <div>
+                    <SearchBar
+                        jobCheck={this.state.jobCheck}
+                        storyCheck={this.state.storyCheck}
+                        commentCheck={this.state.commentCheck}
+                        pollCheck={this.state.pollCheck}
+                        polloptCheck={this.state.polloptCheck}
+                        handleTypeChange={this.handleTypeChange}
+                        handleFilterTextChange={this.handleFilterTextChange}
+                    />
+                    
+                    <ItemTable
+                        items={this.state.items}
+                        filterText={this.state.filterText}
+                        jobCheck={this.state.jobCheck}
+                        storyCheck={this.state.storyCheck}
+                        commentCheck={this.state.commentCheck}
+                        pollCheck={this.state.pollCheck}
+                        polloptCheck={this.state.polloptCheck}
+                    />
+                    {this.state.loading ? <div>Loading...</div> : null}
+                </div>
+            )
+        }
+
+        load = () => {
+            this.setState({loading: true})
+            let start = this.state.counter
+            let end = start + this.state.quantity
+            
+            this.setState({
+                counter: end
+            })
+
+            fetch(`/index_api?start=${start}&end=${end}&type=all`) // Get items from our DB
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    this.setState({
+                        items: [...this.state.items, ...result],
+                    });
+                    this.setState({loading: false})
+                },
+                // Note: it's important to handle errors here
+                // instead of a catch() block so that we don't swallow
+                // exceptions from actual bugs in components.
+                (error) => {
+                this.setState({
+                    error: error
+                });
+                }
+            )
+
+        }
+
+        sync = () => {
+
+            fetch(`/sync`) // Get items from our DB
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    console.log(result)
+                },
+                (error) => {
+                this.setState({
+                    error: error
+                });
+                }
+            )
+
+        }
+
+        componentDidMount() {
+            this.load()
+            // Sync new items to our DB every 5 mins
+            this.interval = setInterval(() => this.sync(), 300000)
+            window.addEventListener("scroll", () => this.handleScroll())
+        }
+
+        componentWillUnmount() {
+            clearInterval(this.interval);
+        }
+
+        handleTypeChange = (target) => {
+            const{name, checked} = target
+            this.setState({
+                    [name]: checked
+                });
+            }
+
+        // Function for change in search box
+        handleFilterTextChange = (filterText) => {
+            this.setState({
+                filterText: filterText
+            });
+        }
+
+        handleScroll = () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+                this.load()
+            }
+        }
+    }
+
+    ReactDOM.render(<App />, document.querySelector("#app"))
+    </script>
+{% endblock body %}

@@ -1,0 +1,104 @@
+{% extends "quickcheck_challenge/layout.html" %}
+
+{% block title %}Item : {{ item_id }}{% endblock title %}
+
+
+{% block body %}
+
+    <div id="app"></div>
+
+    <hr>
+    
+    <script type="text/babel">
+
+    class ItemRow extends React.Component {
+        render() {
+            const item = this.props.item;
+            return (
+                <div>
+                    <div className="card w-100 m-2 bg-info text-black">
+                        
+                            <div className="card-body">
+                                <h5 className="card-title">{item.title}</h5>
+                                <h6 className="card-subtitle mb-2 text-muted">Item Type: {item.type}</h6>
+                                <h6 className="card-subtitle mb-2 text-muted">HN ID: {item.HN_id ? item.HN_id : "Null"}</h6>
+                                <div className="text-muted">ID: {item.id}</div>
+                                <p className="card-text">{item.text}</p>
+                                <div className="text-muted">Date: {item.time}</div>
+                                <div className="text-muted">Deleted: {item.deleted ? item.deleted : "Null"}</div>
+                                <div className="text-muted">Dead: {item.dead ? item.dead : "Null"}</div>
+                                <div className="text-muted">URL: {item.url ? item.url : "Null"}</div>
+                                <div className="text-muted">Got from HN: {item.got_from_HN ? item.got_from_HN : "false"}</div>
+                            </div>
+                    </div>
+                </div>
+                
+            );
+        }
+    }
+
+
+
+    class App extends React.Component {
+
+        constructor(props) {
+            super(props)
+            this.state = {
+                loading: false,
+                item: {},
+                error: "",
+                item_id: "{{ item_id }}"
+            }
+        }
+
+        
+        render() {
+
+            console.log(this.state.item_id)
+            if (this.state.error) return <div>Error: {this.state.error.message}</div>;
+            
+            return (
+                <div>
+                    
+                    <ItemRow
+                        item={this.state.item}
+                    />
+                    {this.state.loading ? <div>Loading...</div> : null}
+                </div>
+            )
+        }
+
+        load = () => {
+            
+            this.setState({loading: true})
+
+            fetch(`/item_api/${this.state.item_id}`) // Get items from our DB
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    this.setState({
+                        item: result,
+                    });
+                    this.setState({loading: false})
+                },
+                // Note: it's important to handle errors here
+                // instead of a catch() block so that we don't swallow
+                // exceptions from actual bugs in components.
+                (error) => {
+                this.setState({
+                    error: error
+                });
+                }
+            )
+
+        }
+
+        componentDidMount() {
+            this.load()
+        }
+
+    }
+
+    ReactDOM.render(<App />, document.querySelector("#app"))
+    </script>
+{% endblock body %}

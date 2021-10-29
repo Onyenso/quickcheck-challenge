@@ -1,0 +1,27 @@
+{% extends 'quickcheck_challenge/layout.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}Sign Up{% endblock title %}
+
+{% block body %}
+
+    <div class="row justify-content-center pt-5 mb-5">
+        <div class="col-md-4">
+
+            <form action="{% url 'qc-register' %}" method="post" style="margin-bottom:20px" id="form">
+                {% csrf_token %}
+                {{ form | crispy}}
+                <div class="row justify-content-center">
+                <button class="btn btn-primary col-3" type="submit" id="button">Log In</button>
+                </div>
+            </form>
+
+            <div style="font-size:large">
+                Already have an account? <a href="{% url 'qc-login' %}">Log In</a>.
+            </div>
+        </div>
+    </div>
+
+{% endblock body %}
+
