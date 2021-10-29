@@ -1,6 +1,6 @@
 # Challenge
 
-This challenge was created per the specifications [here](https://form.jotform.com/211856214308452).
+This project was built per the specifications [here](https://form.jotform.com/211856214308452).
 
 
 # API
